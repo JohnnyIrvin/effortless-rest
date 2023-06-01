@@ -26,7 +26,7 @@ COPY src/ /code/src/
 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-ENTRYPOINT ["python", "-m", "my_project"]
+ENTRYPOINT ["python", "-m", "effortless"]
 
 FROM python:3.10 as TEST
 WORKDIR /code
