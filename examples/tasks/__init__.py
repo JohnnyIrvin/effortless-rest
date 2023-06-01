@@ -20,8 +20,8 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import models
 from effortless import Effortless
-from effortless.integrations import OrmIntegration, FrameworkIntegration
 from effortless.frameworks import EffortlessFlask
+from effortless.integrations import FrameworkIntegration, OrmIntegration
 from effortless.orms import EffortlessSQLAlchemy
 
 
