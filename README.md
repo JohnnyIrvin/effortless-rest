@@ -1,15 +1,6 @@
-# Project Name
+# Effortless Rest
 
-This template is for creating a new project. Please replace this section with your project's introduction.
-
-# Tasks
-
-- [ ] Create a new project from this template.
-- [ ] Replace the project name in the README.md file.
-- [ ] Rename project_name/ to your project_name in snake_case.
-- [ ] Update usage notes to reflect the new project name.
-- [ ] Update the license to reflect the new project contributors.
-- [ ] Update each file's license header to reflect the new project contributors.
+EffortlessREST is a powerful tool that aims to simplify the process of transforming dataclasses into RESTful microservices. Please note that the project is currently in development, and the minimum viable product (MVP) has not been completed yet. As a result, the project is not yet usable. We appreciate your interest and encourage you to stay tuned for updates as we work diligently to deliver a robust and user-friendly solution.
 
 # Usage
 

@@ -20,7 +20,7 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from sys import argv
 
-from project_name import main
+from effortless import main
 
 if __name__ == '__main__':
     main(len(argv), argv)
