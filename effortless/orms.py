@@ -18,15 +18,9 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-from typing import Protocol
 from dataclasses import dataclass
+from .integrations import Integration
 
-class Integration(Protocol):
-    def integrate(self, models: list[dataclass], integrations: dict[type, "Integration"]) -> "Integration":
-        ...
-
-class FrameworkIntegration(Integration):
-    ...
-
-class OrmIntegration(Integration):
-    ...
+class EffortlessSQLAlchemy:
+    def integrate(self, models: list[dataclass], integrations: dict[type, Integration]) -> Integration:
+        raise NotImplementedError('EffortlessSQLAlchemy is not implemented yet.')

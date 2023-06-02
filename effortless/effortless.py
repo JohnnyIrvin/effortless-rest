@@ -57,6 +57,6 @@ class Effortless:
             Effortless: The Effortless instance.
         """        
         for integration in self._integrations.values():
-            integration(self._integrations, self._models)
+            integration.integrate(self._models, self._integrations)
 
         return self
