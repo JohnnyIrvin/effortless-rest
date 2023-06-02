@@ -24,5 +24,22 @@ from .integrations import Integration
 
 
 class EffortlessFlask:
-    def integrate(self, models: list[dataclass], integrations: dict[type, Integration]) -> Integration:
+    def integrate(self, models: list[dataclass], integrations: dict[type, Integration]) -> "EffortlessFlask":
+        """
+        Run integrations on models and return an instance of EffortlessFlask. Use this method to
+        use Flask with the Effortless framework. Flask will handle the HTTP requests and responses
+        while Effortless will pass it models and additional information from other integrations.
+
+        Args:
+            models (list[dataclass]): The models to integrate into the microservice.
+            integrations (dict[type, Integration]):  The integrations to run on the models.
+                Examples of integrations are:
+                    - Database integration
+                    - API integration
+                    - Logging integration
+                    - etc.
+
+        Returns:
+            EffortlessFlask: An instance of EffortlessFlask with the integrations ran on the models.
+        """        
         raise NotImplementedError('EffortlessFlask is not implemented yet.')
