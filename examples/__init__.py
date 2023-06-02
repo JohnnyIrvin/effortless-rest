@@ -18,25 +18,3 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-import models
-from effortless import Effortless
-from effortless.frameworks import EffortlessFlask
-from effortless.integrations import FrameworkIntegration, OrmIntegration
-from effortless.orms import EffortlessSQLAlchemy
-
-
-def main() -> Effortless:
-    """
-    Main entry point for the application.
-    """
-    return (
-        Effortless(
-            models
-        ).uses(
-            OrmIntegration,
-            EffortlessSQLAlchemy,
-        ).uses(
-            FrameworkIntegration,
-            EffortlessFlask,
-        )
-    )
