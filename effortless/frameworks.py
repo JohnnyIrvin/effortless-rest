@@ -23,6 +23,6 @@ from dataclasses import dataclass
 from .integrations import Integration
 
 
-class EffortlessSQLAlchemy:
+class EffortlessFlask:
     def integrate(self, models: list[dataclass], integrations: dict[type, Integration]) -> Integration:
-        raise NotImplementedError('EffortlessSQLAlchemy is not implemented yet.')
+        raise NotImplementedError('EffortlessFlask is not implemented yet.')
