@@ -26,7 +26,7 @@ from . import models
 uvicorn.run(
     Effortless(
         orm=EffortlessSQLAlchemy(),
-        framework=EffortlessFastAPI(),
+        web=EffortlessFastAPI(),
     ).build(
         models=models,
     ),

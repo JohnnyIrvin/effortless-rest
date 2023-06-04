@@ -18,11 +18,11 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-from dataclasses import Field, dataclass
+from dataclasses import dataclass, field
 
 from .task import Task
 
 
 @dataclass
 class TaskList(Task):
-    tasks: list[Task] = Field(default_factory=list)
+    tasks: list[Task] = field(default_factory=list)
