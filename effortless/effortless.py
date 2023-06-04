@@ -41,5 +41,8 @@ class Effortless:
         Args:
             models (ModuleType): Module containing dataclasses.
         """
-        ...
+        stores = self._orm.create_stores(models=models)
+        routes = self._web.create_routes(models=models, stores=stores)
+
+        return self
  
