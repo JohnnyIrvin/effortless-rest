@@ -18,6 +18,29 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+from dataclasses import dataclass, is_dataclass
+from types import ModuleType
+from typing import Any, Dict, TypeVar
+
+T = TypeVar("T")
 
 class EffortlessSQLAlchemy:
-    ...
+    def create_stores(self, models: ModuleType) -> Dict[T, Store[T]]:
+        """
+        create_stores is a method that creates FastAPI stores.
+
+        Args:
+            models (ModuleType): Module containing dataclasses.
+        """
+        stores = {}
+
+        for _, model in models.__dict__.items():
+            if not isinstance(model, type):
+                continue
+
+            if not is_dataclass(model):
+                continue
+
+            stores[model] = self._create_store(model=model)
+
+        return stores
