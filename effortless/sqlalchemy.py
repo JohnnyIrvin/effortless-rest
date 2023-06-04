@@ -18,13 +18,6 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-from .effortless import Effortless
-from .fastapi import EffortlessFastAPI
-from .sqlalchemy import EffortlessSQLAlchemy
 
-__all__ = [
-    "Effortless",
-    "EffortlessFastAPI",
-    "EffortlessSQLAlchemy",
-]
-
+class EffortlessSQLAlchemy:
+    ...
