@@ -27,12 +27,29 @@ from .store import Store
 T = TypeVar("T")
 
 class EffortlessSQLAlchemy:
-    def create_stores(self, models: ModuleType) -> Dict[T, Store[T]]:
+    def _create_store(self, model: T) -> Store[T]:
         """
-        create_stores is a method that creates FastAPI stores.
+        _create_store is a method that creates a SQLAlchemy store. This
+        method is called by create_stores. This method is not meant to be
+        called directly.
 
         Args:
-            models (ModuleType): Module containing dataclasses.
+            model (T): Generic Dataclass, represented by [T]
+
+        Returns:
+            Store[T]: SQLAlchemy store which contains [T]
+        """
+        raise NotImplementedError
+
+    def create_stores(self, models: ModuleType) -> Dict[T, Store[T]]:
+        """
+        create_stores is a method that creates SQLAlchemy stores.
+
+        Args:
+            models (ModuleType): Module containing dataclasses
+
+        Returns:
+            Dict[T, Store[T]]: Dictionary of SQLAlchemy stores
         """
         stores = {}
 
