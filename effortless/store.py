@@ -18,20 +18,20 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-from typing import Protocol, TypeVar
-from uuid import uuid4
+from typing import Optional, Protocol, TypeVar
+from uuid import UUID, uuid4
 
 T = TypeVar("T")
 
 class Store(Protocol[T]):
-    def get(self, uuid: uuid4) -> T:
+    def get(self, uuid: UUID) -> Optional[T]:
         ...
 
-    def update(self, uuid: uuid4, value: T) -> "Store[T]":
+    def update(self, uuid: UUID, value: T) -> "Store[T]":
         ...
 
-    def delete(self, uuid: uuid4) -> "Store[T]":
+    def delete(self, uuid: UUID) -> "Store[T]":
         ...
 
-    def create(self, value: T) -> uuid4:
+    def create(self, value: T) -> UUID:
         ...
