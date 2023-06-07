@@ -18,13 +18,15 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-from dataclasses import asdict, dataclass, is_dataclass
+import enum
+from dataclasses import asdict, dataclass, fields, is_dataclass
 from types import ModuleType
 from typing import Dict, Optional, TypeVar
-from uuid import uuid4, UUID
+from uuid import UUID, uuid4
 
-from sqlalchemy import Column, Engine, create_engine, Text
-from sqlalchemy.orm import Session
+from sqlalchemy import (Column, Engine, Enum, Float, Integer, String,
+                        create_engine)
+from sqlalchemy.orm import Session, mapped_column
 from sqlalchemy.orm import registry as SQLAlchemyRegistry
 
 from .store import Store
@@ -32,30 +34,57 @@ from .store import Store
 T = TypeVar("T", bound=dataclass)
 
 class _AlchemyStore:
+
+    def _get_compatible_column(self, value: type) -> Column:
+        supported = {
+            str: String,
+            int: Integer,
+            float: Float,
+            enum.Enum: Enum
+        }
+
+        for key, val in supported.items():
+            if not issubclass(value, key):
+                continue
+
+            if issubclass(value, enum.Enum):
+                return Column(Enum(value), nullable=False)
+            
+            return Column(val())
+        
+        raise ValueError(f"Unsupported type {value}")
+    
     def __init__(self, dataclass: T, registry: SQLAlchemyRegistry, engine: Engine) -> None:
         dataclass.__tablename__ = dataclass.__name__.lower()
+
         dataclass.id = Column(
-            Text(),
+            String(),
             primary_key=True,
             default=uuid4,
             unique=True,
             nullable=False
         )
 
-        self.data_class = dataclass
+        for field in fields(dataclass):
+            if field.name == "id":
+                continue
+            
+            setattr(dataclass, field.name, self._get_compatible_column(field.type))
+
+        self._dataclass = dataclass
         self._table = registry.mapped(dataclass)
         self._engine = engine
 
     def get(self, uuid: UUID) -> Optional[T]:
         with Session(self._engine) as session:
-            return session.get(self.data_class, uuid)
+            return session.get(self._dataclass, uuid)
 
     def update(self, uuid: UUID, value: T) -> "Store[T]":
         with Session(self._engine) as session:
-            existing = session.get(self.data_class, uuid)
+            existing = session.get(self._dataclass, uuid)
 
             if existing is None:
-                raise ValueError(f"Could not find {self.data_class.__name__} with uuid {uuid}")
+                raise ValueError(f"Could not find {self._dataclass.__name__} with uuid {uuid}")
 
             for key, val in asdict(value).items():
                 if key == "uuid":
@@ -69,10 +98,10 @@ class _AlchemyStore:
 
     def delete(self, uuid: UUID) -> "Store[T]":
         with Session(self._engine) as session:
-            existing = session.get(self.data_class, uuid)
+            existing = session.get(self._dataclass, uuid)
 
             if existing is None:
-                raise ValueError(f"Could not find {self.data_class.__name__} with uuid {uuid}")
+                raise ValueError(f"Could not find {self._dataclass.__name__} with uuid {uuid}")
 
             session.delete(existing)
             session.commit()
@@ -80,12 +109,19 @@ class _AlchemyStore:
         return self
 
     def create(self, value: T) -> UUID:
+        if hasattr(value, "id"):
+            value.id = str(uuid4())
+
         with Session(self._engine) as session:
             session.add(value)
             session.commit()
             session.refresh(value)
 
         return value.id
+    
+    def all(self) -> list[T]:
+        with Session(self._engine) as session:
+            return session.query(self._dataclass).all()
 
 
 class EffortlessSQLAlchemy:
@@ -117,9 +153,7 @@ class EffortlessSQLAlchemy:
         """
         _save_tables is a method that saves the SQLAlchemy tables.
         """
-        with Session(self._engine) as session:
-            self._registry.metadata.create_all(session)
-            session.commit()
+        self._registry.metadata.create_all(self._engine)
 
     def create_stores(self, models: ModuleType) -> Dict[T, Store[T]]:
         """
@@ -141,6 +175,12 @@ class EffortlessSQLAlchemy:
                 continue
 
             stores[model] = self._create_store(model=model)
-            self._registry.metadata.create_all(self._engine)
+            self._save_tables()
 
+        from sqlalchemy import inspect
+        inspector = inspect(self._engine)
+        for table_name in inspector.get_table_names():
+            for column_name in inspector.get_columns(table_name):
+                print(f'Table: {table_name} {"*" * 10} Column: {column_name}')
+    
         return stores

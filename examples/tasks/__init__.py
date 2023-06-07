@@ -18,16 +18,24 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+import os
+import pathlib
+
 import uvicorn
 
 from effortless import Effortless, EffortlessFastAPI, EffortlessSQLAlchemy
 
 from . import models
 
+DATABASE_DIRECTORY = f'{pathlib.Path(__file__).parent.absolute()}/databases'
+
+if not os.path.exists(DATABASE_DIRECTORY):
+    os.makedirs(DATABASE_DIRECTORY)
+
 uvicorn.run(
     Effortless(
         orm=EffortlessSQLAlchemy(
-            connection='sqlite+pysqlite:///:memory:',
+            connection=f'sqlite+pysqlite:///{DATABASE_DIRECTORY}/tasks.db',
         ),
         web=EffortlessFastAPI(),
     ).build(
