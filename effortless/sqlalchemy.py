@@ -18,15 +18,36 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-from dataclasses import is_dataclass
+from dataclasses import fields, is_dataclass
 from types import ModuleType
-from typing import Dict, TypeVar
+from typing import Dict, Optional, TypeVar
+from uuid import uuid4
+
+from sqlalchemy import UUID, Column, Table
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import registry as SQLAlchemyRegistry
 
 from .store import Store
 
 T = TypeVar("T")
 
+class _AlchemyStore:
+    def __init__(self, dataclass: T, registry: SQLAlchemyRegistry) -> None:
+        dataclass.__tablename__ = dataclass.__name__.lower()
+        dataclass.uuid = Column(
+            UUID(as_uuid=True),
+            primary_key=True,
+            default=uuid4,
+            unique=True,
+            nullable=False
+        )
+
+        self._table = registry.mapped(dataclass)
+
 class EffortlessSQLAlchemy:
+    def __init__(self) -> None:
+        self._registry = SQLAlchemyRegistry()
+        
     def _create_store(self, model: T) -> Store[T]:
         """
         _create_store is a method that creates a SQLAlchemy store. This
@@ -39,7 +60,7 @@ class EffortlessSQLAlchemy:
         Returns:
             Store[T]: SQLAlchemy store which contains [T]
         """
-        raise NotImplementedError
+        return _AlchemyStore(dataclass=model, registry=self._registry)
 
     def create_stores(self, models: ModuleType) -> Dict[T, Store[T]]:
         """
