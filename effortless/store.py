@@ -35,3 +35,6 @@ class Store(Protocol[T]):
 
     def create(self, value: T) -> UUID:
         ...
+
+    def all(self) -> list[T]:
+        ...
