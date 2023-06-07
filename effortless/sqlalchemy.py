@@ -18,35 +18,86 @@
 # LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-from dataclasses import fields, is_dataclass
+from dataclasses import asdict, dataclass, is_dataclass
 from types import ModuleType
 from typing import Dict, Optional, TypeVar
-from uuid import uuid4
+from uuid import uuid4, UUID
 
-from sqlalchemy import UUID, Column, Table
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy import Column, Engine, create_engine, Text
+from sqlalchemy.orm import Session
 from sqlalchemy.orm import registry as SQLAlchemyRegistry
 
 from .store import Store
 
-T = TypeVar("T")
+T = TypeVar("T", bound=dataclass)
 
 class _AlchemyStore:
-    def __init__(self, dataclass: T, registry: SQLAlchemyRegistry) -> None:
+    def __init__(self, dataclass: T, registry: SQLAlchemyRegistry, engine: Engine) -> None:
         dataclass.__tablename__ = dataclass.__name__.lower()
-        dataclass.uuid = Column(
-            UUID(as_uuid=True),
+        dataclass.id = Column(
+            Text(),
             primary_key=True,
             default=uuid4,
             unique=True,
             nullable=False
         )
 
+        self.data_class = dataclass
         self._table = registry.mapped(dataclass)
+        self._engine = engine
+
+    def get(self, uuid: UUID) -> Optional[T]:
+        with Session(self._engine) as session:
+            return session.get(self.data_class, uuid)
+
+    def update(self, uuid: UUID, value: T) -> "Store[T]":
+        with Session(self._engine) as session:
+            existing = session.get(self.data_class, uuid)
+
+            if existing is None:
+                raise ValueError(f"Could not find {self.data_class.__name__} with uuid {uuid}")
+
+            for key, val in asdict(value).items():
+                if key == "uuid":
+                    continue
+
+                setattr(existing, key, val)
+
+            session.commit()
+
+        return self
+
+    def delete(self, uuid: UUID) -> "Store[T]":
+        with Session(self._engine) as session:
+            existing = session.get(self.data_class, uuid)
+
+            if existing is None:
+                raise ValueError(f"Could not find {self.data_class.__name__} with uuid {uuid}")
+
+            session.delete(existing)
+            session.commit()
+
+        return self
+
+    def create(self, value: T) -> UUID:
+        with Session(self._engine) as session:
+            session.add(value)
+            session.commit()
+            session.refresh(value)
+
+        return value.id
+
 
 class EffortlessSQLAlchemy:
-    def __init__(self) -> None:
+    def __init__(self, connection: str) -> None:
+        """
+        __init__ is the constructor for EffortlessSQLAlchemy.
+
+        Args:
+            connection (str): SQLAlchemy connection string
+        """        
         self._registry = SQLAlchemyRegistry()
+        self._engine = create_engine(connection, echo=True)
         
     def _create_store(self, model: T) -> Store[T]:
         """
@@ -60,7 +111,15 @@ class EffortlessSQLAlchemy:
         Returns:
             Store[T]: SQLAlchemy store which contains [T]
         """
-        return _AlchemyStore(dataclass=model, registry=self._registry)
+        return _AlchemyStore(dataclass=model, registry=self._registry, engine=self._engine)
+    
+    def _save_tables(self) -> None:
+        """
+        _save_tables is a method that saves the SQLAlchemy tables.
+        """
+        with Session(self._engine) as session:
+            self._registry.metadata.create_all(session)
+            session.commit()
 
     def create_stores(self, models: ModuleType) -> Dict[T, Store[T]]:
         """
@@ -82,5 +141,6 @@ class EffortlessSQLAlchemy:
                 continue
 
             stores[model] = self._create_store(model=model)
+            self._registry.metadata.create_all(self._engine)
 
         return stores

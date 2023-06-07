@@ -19,13 +19,16 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 import uvicorn
+
 from effortless import Effortless, EffortlessFastAPI, EffortlessSQLAlchemy
 
 from . import models
 
 uvicorn.run(
     Effortless(
-        orm=EffortlessSQLAlchemy(),
+        orm=EffortlessSQLAlchemy(
+            connection='sqlite+pysqlite:///:memory:',
+        ),
         web=EffortlessFastAPI(),
     ).build(
         models=models,
