@@ -23,6 +23,6 @@ from dataclasses import dataclass, field
 from .task import Task
 
 
-@dataclass
-class TaskList(Task):
-    tasks: list[Task] = field(default_factory=list)
+# @dataclass
+# class TaskList(Task):
+#     tasks: list[Task] = field(default_factory=list)

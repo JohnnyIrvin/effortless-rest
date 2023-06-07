@@ -19,9 +19,9 @@
 # OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 from .task import Task
-from .task_list import TaskList
+# from .task_list import TaskList
 
 __all__ = [
     "Task",
-    "TaskList",
+    # "TaskList",
 ]
